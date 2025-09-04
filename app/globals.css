@@ -1,26 +1,67 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root{
+  --bg:#ffffff;
+  --primary:#0b66ff; /* biru */
+  --muted:#f5f7fb;
+  --text:#000000;
+  --card:#ffffff;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html,body,#root{
+  height:100%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body{
+  margin:0;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  background:var(--muted);
+  color:var(--text);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.header{
+  background:linear-gradient(90deg,var(--primary),#1677ff);
+  color:white;
+  padding:14px 24px;
+}
+
+.container{
+  max-width:1100px;
+  margin:24px auto;
+  background:var(--card);
+  padding:20px;
+  border-radius:10px;
+  box-shadow: 0 6px 20px rgba(11,102,255,0.08);
+}
+
+/* table sederhana */
+.table {
+  width:100%;
+  border-collapse: collapse;
+}
+.table th, .table td {
+  padding:10px 8px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+}
+
+.button {
+  background:var(--primary);
+  color:white;
+  padding:8px 12px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+}
+
+.button.secondary{
+  background:#e6eefc;
+  color:var(--primary);
+  border:1px solid rgba(11,102,255,0.08);
+}
+
+.form-row{ margin-bottom:12px; }
+.input, textarea {
+  width:100%;
+  padding:8px;
+  border:1px solid #ddd;
+  border-radius:6px;
 }
