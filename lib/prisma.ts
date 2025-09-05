@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 declare global {
   // agar prisma tidak membuat banyak instance saat hot-reload di dev
   // @ts-ignore
-  var __prisma?: PrismaClient;
+  var __prisma: PrismaClient | undefined;
 }
 
 export const prisma = global.__prisma ?? new PrismaClient();

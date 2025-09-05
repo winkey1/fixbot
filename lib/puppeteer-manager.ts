@@ -13,7 +13,7 @@
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import puppeteer, { Browser } from 'puppeteer';
+import puppeteer, { Browser, Page } from 'puppeteer';
 
 const DATA_DIR = process.env.DATA_DIR || './data';
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -179,15 +179,17 @@ export async function startJoinGroups(userId: string, sessionNames: string[], gr
   return { jobId, results };
 }
 
-async function attemptPostingWithRetries(page: puppeteer.Page, imagePath: string, text: string) {
+async function attemptPostingWithRetries(page: Page, imagePath: string, text: string) {
   // adaptasi dari source reference
   const MAX_ATTEMPTS = 3;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       // coba buka modal posting
       // klik area "Buat Postingan" — pendekatan umum: cari textarea placeholder
-      await page.waitForSelector("xpath///span[text()='Postingan Anonim']").then(el => el.click());
-      await page.waitForSelector("xpath///span[text()='Buat Postingan Anonim']").then(el => el.click());
+      const anonBtn = await page.waitForSelector("xpath///span[text()='Postingan Anonim']");
+      if (anonBtn) await anonBtn.click();
+      const createAnonBtn = await page.waitForSelector("xpath///span[text()='Buat Postingan Anonim']");
+      if (createAnonBtn) await createAnonBtn.click();
       const textAreaSelector = 'div[aria-placeholder="Kirim postingan anonim..."]';
        await page.waitForSelector(textAreaSelector, { visible: true, timeout: 10000 });
        const [fileChooser] = await Promise.all([
@@ -272,7 +274,7 @@ export async function startPostAndComment(userId: string, sessionNames: string[]
           const urls = [];
         const urlsPattern = /facebook\.com\/groups\/\d+\/?$/;
         for (const link of linkElements) {
-            const url = await page.evaluate(el => el.href, link);
+            const url = await page.evaluate(el => (el as HTMLAnchorElement).href, link);
             if (urlsPattern.test(url)) {
                 urls .push(url);
             }

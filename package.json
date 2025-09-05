@@ -2,6 +2,9 @@
   "name": "v6",
   "version": "0.1.0",
   "private": true,
+  "author": "stuz",
+  "main": ".next/standalone/server.js",
+  "description": "Facebook automation bot",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
@@ -9,11 +12,20 @@
     "lint": "eslint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "ts-node --transpile-only prisma/seed.ts"
+    "prisma:seed": "ts-node --transpile-only prisma/seed.ts",
+    "electron": "electron electron.js",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.fbautomation.app",
+    "productName": "FB Automation",
+    "win": {
+      "target": "nsis"
+    }
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
-    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
     "next": "15.5.2",
     "next-auth": "^4.24.11",
     "papaparse": "^5.5.3",
@@ -26,9 +38,14 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20.19.12",
+    "@types/papaparse": "^5.3.16",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "app-builder-bin": "^5.0.0-alpha.12",
+    "electron": "^30.0.0",
+    "electron-builder": "^26.0.12",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "tailwindcss": "^4",
