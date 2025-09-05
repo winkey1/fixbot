@@ -25,6 +25,9 @@ jobs:
         run: npm ci
         timeout-minutes: 30
 
+      - name: Generate Prisma client
+        run: npx prisma generate
+
       - name: Build desktop app
         run: npm run build:desktop
         timeout-minutes: 30
