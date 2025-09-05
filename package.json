@@ -1,20 +1,15 @@
 {
-  "name": "v6",
-  "version": "0.1.0",
+  "name": "fbbot",
+  "version": "3.1.0",
   "private": true,
   "author": "stuz",
-  "main": ".next/standalone/server.js",
+  "main": "electron.js",
   "description": "Facebook automation bot",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
-    "lint": "eslint",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "ts-node --transpile-only prisma/seed.ts",
-    "electron": "electron electron.js",
-    "dist": "electron-builder"
+    "dev:desktop": "concurrently \"next dev\" \"electron .\"",
+    "build:web": "next build",
+    "start:web": "next start",
+    "build:desktop": "next build && electron-builder"
   },
   "build": {
     "appId": "com.fbautomation.app",
