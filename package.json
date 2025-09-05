@@ -1,6 +1,6 @@
 {
   "name": "fbbot",
-  "version": "4.1.0",
+  "version": "4.5.0",
   "private": true,
   "author": "stuz",
   "main": "electron.js",
@@ -11,13 +11,29 @@
     "start:web": "next start",
     "build:desktop": "next build && electron-builder"
   },
-  "build": {
+   "build": {
     "appId": "com.fbautomation.app",
-    "productName": "FB Automation",  
-    "publish": [],
-    "win": {
-      "target": "nsis"
-    }
+    "productName": "FB Automation",
+    "files": [
+      "electron.js",
+      "server.js",
+      ".next/**",
+      "package.json",
+      "node_modules/**",
+      "prisma/**",
+      "public/**"
+    ],
+    "asar": false,
+    "extraResources": [
+      {
+        "from": "node_modules/puppeteer/.local-chromium",
+        "to": "local-chromium",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": { "target": "nsis" },
+    "linux": { "target": "AppImage" },
+    "mac": { "target": "dmg" }
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",

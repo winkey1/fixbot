@@ -9,42 +9,30 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    webPreferences: {
-      nodeIntegration: false,
-    },
+    webPreferences: { nodeIntegration: false }
   });
 
+  // Arahkan ke Next.js server
   mainWindow.loadURL("http://localhost:3000");
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
+  mainWindow.on('closed', () => { mainWindow = null; });
 }
 
 app.on('ready', () => {
-  // jalankan Next.js build hasil produksi
-  server = spawn(
-    'node',
-    ['node_modules/next/dist/bin/next', 'start', '-p', '3000'],
-    {
-      cwd: path.join(__dirname),
-      env: process.env,
-      stdio: 'inherit',
-    }
-  );
+  // Jalankan server.js hasil build Next.js
+  server = spawn('node', ['server.js'], {
+    cwd: path.join(__dirname),
+    env: process.env,
+    stdio: 'inherit'
+  });
 
-  // tunggu server siap baru buka window
-  setTimeout(createWindow, 4000);
+  setTimeout(createWindow, 4000); // tunggu server siap
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('quit', () => {
-  if (server) {
-    server.kill();
-  }
+  if (server) server.kill();
 });
