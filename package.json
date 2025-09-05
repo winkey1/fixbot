@@ -6,10 +6,11 @@
   "main": "electron.js",
   "description": "Facebook automation bot",
   "scripts": {
-    "dev:desktop": "concurrently \"next dev\" \"electron .\"",
+    "dev": "next dev",
     "build:web": "next build",
-    "start:web": "next start",
-    "build:desktop": "next build && electron-builder"
+    "build:electron": "npm run build:web && electron-builder",
+    "start": "next start",
+    "electron": "electron ."
   },
    "build": {
     "appId": "com.fbautomation.app",

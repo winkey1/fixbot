@@ -2,8 +2,7 @@ name: Build Desktop App
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -13,26 +12,34 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install deps
+        run: npm ci
+        timeout-minutes: 30
 
       - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Build app
-        run: npm run build:electron
+      - name: Build desktop app
+        run: npm run build:desktop
+        timeout-minutes: 30
 
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fb-automation-${{ matrix.os }}
-          path: dist/*
+          name: desktop-build-${{ matrix.os }}
+          path: dist/
+
+
 
