@@ -14,7 +14,6 @@
   "build": {
     "appId": "com.fbautomation.app",
     "productName": "FB Automation",
-    "publish": "never",
     "win": {
       "target": "nsis"
     }
