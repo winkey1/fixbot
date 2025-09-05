@@ -23,9 +23,11 @@ jobs:
 
       - name: Install deps
         run: npm ci
+        timeout-minutes: 30
 
       - name: Build desktop app
         run: npm run build:desktop
+        timeout-minutes: 30
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
