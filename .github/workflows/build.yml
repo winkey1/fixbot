@@ -3,7 +3,8 @@ name: Build Desktop App
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
