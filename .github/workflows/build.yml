@@ -12,7 +12,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
-    env: # <<<< Tambahkan di sini agar semua step dapat env
+    env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     steps:
