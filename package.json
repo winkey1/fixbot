@@ -3,7 +3,7 @@
   "version": "5.0.0",
   "private": true,
   "author": "stuz",
-  "main": "electron.js",
+  "main": "electron/main.js",
   "description": "Facebook automation bot",
   "homepage": "./",
   "scripts": {
@@ -39,16 +39,7 @@
     },
     "linux": {
       "target": "AppImage"
-    },
-    "extraResources": [
-      {
-        "from": "prisma/dev.db",
-        "to": "prisma/dev.db",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ]
+    }
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
