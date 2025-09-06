@@ -41,8 +41,13 @@ app.on('ready', () => {
   // Saat dev, kita menjalankannya secara terpisah
   if (!isDev) {
     const userDataPath = app.getPath('userData');
-    process.env.DATA_DIR = path.join(userDataPath, 'data');
-    process.env.UPLOAD_DIR = path.join(userDataPath, 'uploads');
+    const options = {
+      env: {
+        ...process.env, // Warisi semua env yang sudah ada
+        DATA_DIR: path.join(userDataPath, 'data'),
+        UPLOAD_DIR: path.join(userDataPath, 'uploads')
+      }
+    };
     const serverPath = path.join(__dirname, '..', 'node_modules', '.bin', 'next');
     
     // Gunakan 'node' untuk menjalankan skrip 'next'
