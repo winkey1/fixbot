@@ -22,6 +22,7 @@
     "productName": "FB Automation",
     "files": [
       "electron/main.js",
+      "server.js",
       "package.json",
       ".next/**/*",
       "public/**/*",
@@ -40,7 +41,7 @@
     "linux": {
       "target": "AppImage"
     }
-    
+
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",

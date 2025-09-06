@@ -48,11 +48,9 @@ app.on('ready', () => {
         UPLOAD_DIR: path.join(userDataPath, 'uploads')
       }
     };
-    const serverPath = path.join(__dirname, '..', 'node_modules', '.bin', 'next');
-    
-    // Gunakan 'node' untuk menjalankan skrip 'next'
+    const serverPath = path.join(__dirname, '..', 'server.js');
     const command = 'node';
-    const args = [serverPath, 'start', '-p', port];
+    const args = [serverPath];
     
     console.log(`Starting Next.js server with command: ${command} ${args.join(' ')}`);
 
