@@ -40,6 +40,7 @@
     "linux": {
       "target": "AppImage"
     }
+    
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
