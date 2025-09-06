@@ -56,10 +56,24 @@ app.on('ready', () => {
     
     console.log(`Starting Next.js server with command: ${command} ${args.join(' ')}`);
 
-    nextServer = spawn(command, args, {
-      stdio: 'inherit', // Tampilkan output server di console utama
-      shell: process.platform === 'win32' // Gunakan shell di Windows
-    });
+    // Hapus stdio: 'inherit' untuk menangkap output secara manual
+  nextServer = spawn(command, args, {
+    shell: process.platform === 'win32'
+  });
+
+// Tangkap dan cetak output standar dari server
+  nextServer.stdout.on('data', (data) => {
+   console.log(`LOG DARI NEXT.JS: ${data}`);
+  });
+
+// Tangkap dan cetak output error dari server (INI YANG PENTING)
+  nextServer.stderr.on('data', (data) => {
+    console.error(`ERROR DARI NEXT.JS: ${data}`);
+  });
+
+  nextServer.on('close', (code) => {
+    console.log(`Server Next.js berhenti dengan kode: ${code}`);
+  });
 
     nextServer.on('error', (err) => {
       console.error('Failed to start Next.js server.', err);
