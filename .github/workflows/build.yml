@@ -16,12 +16,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18' # Gunakan versi Node yang sesuai
+          node-version: '20' # Gunakan versi Node yang sesuai
 
       - name: Install dependencies
         run: npm ci # 'ci' lebih cepat dan andal untuk CI/CD
@@ -36,7 +36,7 @@ jobs:
         run: npm run build
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fb-automation-${{ matrix.os }}
           path: dist/
