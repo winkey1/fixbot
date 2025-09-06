@@ -14,8 +14,9 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import puppeteer, { Browser, Page } from 'puppeteer';
+import { app } from 'electron';
 
-const DATA_DIR = process.env.DATA_DIR || './data';
+const DATA_DIR = process.env.DATA_DIR || (app ? path.join(app.getPath('userData'), 'sessions') : './data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 type Account = { email: string; password: string };

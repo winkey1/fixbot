@@ -1,43 +1,59 @@
 {
-  "name": "fbbot",
-  "version": "4.5.0",
+  "name": "fb-automation-desktop",
+  "version": "5.0.0",
   "private": true,
   "author": "stuz",
   "main": "electron.js",
   "description": "Facebook automation bot",
+  "homepage": "./",
   "scripts": {
-    "dev:desktop": "concurrently \"next dev\" \"electron .\"",
-    "build:web": "next build",
-    "start:web": "next start",
-    "build:desktop": "next build && electron-builder"
+    "dev": "concurrently \"npm:next:dev\" \"npm:electron:dev\"",
+    "next:dev": "next dev",
+    "electron:dev": "electron .",
+    "build": "npm run next:build && electron-builder",
+    "next:build": "next build",
+    "start": "electron .",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "ts-node --transpile-only prisma/seed.ts"
   },
-   "build": {
-    "appId": "com.fbautomation.app",
+  "build": {
+    "appId": "com.stuz.fbautomation",
     "productName": "FB Automation",
     "files": [
-      "electron.js",
-      "server.js",
-      ".next/**",
+      "electron/main.js",
       "package.json",
-      "node_modules/**",
-      "prisma/**",
-      "public/**"
+      ".next/**/*",
+      "public/**/*",
+      "node_modules/**/*",
+      "prisma/**/*"
     ],
-    "asar": false,
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
     "extraResources": [
       {
-        "from": "node_modules/puppeteer/.local-chromium",
-        "to": "local-chromium",
-        "filter": ["**/*"]
+        "from": "prisma/dev.db",
+        "to": "prisma/dev.db",
+        "filter": [
+          "**/*"
+        ]
       }
-    ],
-    "win": { "target": "nsis" },
-    "linux": { "target": "AppImage" },
-    "mac": { "target": "dmg" }
+    ]
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
     "bcryptjs": "^3.0.2",
+    "concurrently": "^9.2.1",
     "next": "15.5.2",
     "next-auth": "^4.24.11",
     "papaparse": "^5.5.3",
