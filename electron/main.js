@@ -48,7 +48,7 @@ app.on('ready', () => {
         UPLOAD_DIR: path.join(userDataPath, 'uploads')
       }
     };
-    const serverPath = path.join(__dirname, '..', 'server.js');
+    const serverPath = path.join(process.resourcesPath, 'server.js');
     const command = 'node';
     const args = [serverPath];
     
