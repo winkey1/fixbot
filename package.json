@@ -21,7 +21,7 @@
     "appId": "com.stuz.fbautomation",
     "productName": "FB Automation",
     "files": [
-      "electron/main.js",
+      "electron/**/*",
       "server.js",
       "package.json",
       ".next/**/*",
