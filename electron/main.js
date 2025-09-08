@@ -48,7 +48,7 @@ app.on('ready', () => {
         UPLOAD_DIR: path.join(userDataPath, 'uploads')
       }
     };
-    const serverPath = path.join(process.resourcesPath, 'server.js');
+    const serverPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'server.js');
     const command = 'node';
     const args = [serverPath];
     
