@@ -20,6 +20,8 @@
   "build": {
     "appId": "com.stuz.fbautomation",
     "productName": "FB Automation",
+    "asar": true,
+    "asarUnpack": ["server.js"],
     "files": [
       "electron/**/*",
       "server.js",
