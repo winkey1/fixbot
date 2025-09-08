@@ -3,13 +3,17 @@ productName: FB Automation
 directories:
   output: dist
 files:
-  - "!{dist,node_modules/.cache}/**"
-  - "package.json"
   - "electron.js"
+  - "server.js"
+  - "package.json"
+  - ".next/**"
+  - "public/**"
+  - "node_modules/**"
+  - "prisma/**"
+  - "!{dist,node_modules/.cache}/**"
+
 extraResources:
-  - public/**
   - data/**
-  - prisma/**
 win:
   target: nsis
   icon: public/favicon.ico
