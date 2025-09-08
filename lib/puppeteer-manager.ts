@@ -179,47 +179,72 @@ export async function startJoinGroups(userId: string, sessionNames: string[], gr
   return { jobId, results };
 }
 
-async function attemptPostingWithRetries(page: Page, imagePath: string, text: string) {
-  // adaptasi dari source reference
+async function postCommentDirectly(page: Page, text: string) {
+  const COMMENT_TEXTBOX_SELECTOR = 'div[aria-label="Komentari sebagai Peserta anonim"][role="textbox"]';
+
+  try {
+    const commentTextbox = await page.waitForSelector(COMMENT_TEXTBOX_SELECTOR, { visible: true, timeout: 15000 });
+    if (!commentTextbox) return false;
+
+    await commentTextbox.focus(); // fokus dulu ke textbox
+    await page.keyboard.type(text, { delay: 80 }); // ketik isi komentar
+    await delay(5000);
+    await page.keyboard.press('Enter'); // kirim komentar
+
+    return true;
+  } catch (error) {
+    console.error("⚠️ Gagal mengirim komentar:", error);
+    return false;
+  }
+}
+
+
+async function attemptPostingWithRetries(page: Page, imagePath: string, text: string, job: { stopRequested: boolean }) {
   const MAX_ATTEMPTS = 3;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    try {
-      // coba buka modal posting
-      // klik area "Buat Postingan" — pendekatan umum: cari textarea placeholder
-      const anonBtn = await page.waitForSelector("xpath///span[text()='Postingan Anonim']");
-      if (anonBtn) await anonBtn.click();
-      const createAnonBtn = await page.waitForSelector("xpath///span[text()='Buat Postingan Anonim']");
-      if (createAnonBtn) await createAnonBtn.click();
-      const textAreaSelector = 'div[aria-placeholder="Kirim postingan anonim..."]';
-       await page.waitForSelector(textAreaSelector, { visible: true, timeout: 10000 });
-       const [fileChooser] = await Promise.all([
-            page.waitForFileChooser({ timeout: 10000 }),
-            page.click('div[aria-label="Foto/video"]') 
-        ]);
+    if (job.stopRequested) return false;
 
-        await fileChooser.accept([imagePath]);
-        const postButtonSelector = 'div[aria-label="Kirim"][role="button"]:not([aria-disabled="true"])';
-        await page.waitForSelector(postButtonSelector, { visible: true, timeout: 60000 });
-        
-      const textarea = await page.$(textAreaSelector);
-      if (textarea) {
-        await textarea.focus();
-        await page.keyboard.type(text, { delay: 80 });
-      }
-      // click tombol kirim jika ada
-      // temukan tombol yang berisi kata 'Kirim' atau 'Posting'
+    try {
+      const anonBtn = await page.waitForSelector("xpath///span[text()='Postingan Anonim']", { timeout: 10000 }).catch(()=>null);
+      if (job.stopRequested) return false;
+      if (anonBtn) await anonBtn.click().catch(()=>{});
+
+      const createAnonBtn = await page.waitForSelector("xpath///span[text()='Buat Postingan Anonim']", { timeout: 10000 }).catch(()=>null);
+      if (job.stopRequested) return false;
+      if (createAnonBtn) await createAnonBtn.click().catch(()=>{});
+
+      const textAreaSelector = 'div[aria-placeholder="Kirim postingan anonim..."]';
+      await page.waitForSelector(textAreaSelector, { visible: true, timeout: 10000 }).catch(()=>{});
+      if (job.stopRequested) return false;
+
+      const [fileChooser] = await Promise.all([
+        page.waitForFileChooser({ timeout: 10000 }),
+        page.click('div[aria-label="Foto/video"]').catch(()=>{})
+      ]);
+      if (job.stopRequested) return false;
+      if (fileChooser) await fileChooser.accept([imagePath]);
       const buttons = await page.$$('button');
       for (const b of buttons) {
+        if (job.stopRequested) return false;
         const t = (await page.evaluate(el => el.textContent, b) || '').toLowerCase();
         if (t.includes('kirim') || t.includes('posting') || t.includes('post')) {
           await b.click().catch(()=>{});
           await delay(3000);
+
+          const commentOk = await postCommentDirectly(page, text);
+          if (commentOk) {
+          console.log("✅ Postingan dan komentar berhasil");
           return true;
-        }
+      } else {
+          console.log("⚠️ Postingan berhasil tapi komentar gagal");
+          return false;
       }
-      // fallback success
+}
+      }
+
       return true;
-    } catch (err) {
+    } catch {
+      if (job.stopRequested) return false;
       if (attempt < MAX_ATTEMPTS) {
         await page.reload({ waitUntil: 'networkidle2' }).catch(()=>{});
         await delay(5000);
@@ -260,39 +285,40 @@ export async function startPostAndComment(userId: string, sessionNames: string[]
 
       try {
         const page = await browser.newPage();
-        page.on('dialog', async dialog => {console.log(` > Dialog muncul, pesan: "${dialog.message()}". Otomatis diterima.`);
-        await dialog.accept();
+        page.on('dialog', async dialog => {
+          await dialog.accept().catch(()=>{});
         });
+
+        if (job.stopRequested) break;
         await page.goto('https://www.facebook.com/groups/feed/', { waitUntil: 'networkidle2', timeout: 30000 }).catch(()=>{});
-        // ambil pinned groups seperti di reference (a[.//i])
-       try {
+
+        try {
           const pinnedXPath = "//a[.//i]";
-            await page.waitForSelector(`xpath/${pinnedXPath}`, { timeout: 30000 });
-            const linkElements = await page.$$(`xpath/${pinnedXPath}`);
-        
-        
-          const urls = [];
-        const urlsPattern = /facebook\.com\/groups\/\d+\/?$/;
-        for (const link of linkElements) {
+          await page.waitForSelector(`xpath/${pinnedXPath}`, { timeout: 30000 }).catch(()=>null);
+          if (job.stopRequested) break;
+
+          const linkElements = await page.$$(`xpath/${pinnedXPath}`);
+          const urlsPattern = /facebook\.com\/groups\/\d+\/?$/;
+          const urls: string[] = [];
+          for (const link of linkElements) {
             const url = await page.evaluate(el => (el as HTMLAnchorElement).href, link);
-            if (urlsPattern.test(url)) {
-                urls .push(url);
-            }
-        }
+            if (urlsPattern.test(url)) urls.push(url);
+          }
 
           for (const url of urls) {
             if (job.stopRequested) break;
             await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 }).catch(()=>{});
-            const ok = await attemptPostingWithRetries(page, imagePath, commentText);
+            if (job.stopRequested) break;
+
+            const ok = await attemptPostingWithRetries(page, imagePath, commentText, job);
             results.push({ session: sessName, group: url, ok });
-            // tunggu 5s antar grup
             await delay(5000);
           }
-        } catch (err: any) {
+        } catch {
           results.push({ session: sessName, ok: false, message: 'Gagal ambil pinned groups' });
         }
       } finally {
-        await browser.close();
+        await browser.close().catch(()=>{});
         job.browsers = job.browsers.filter(b => b !== browser);
       }
     }

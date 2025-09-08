@@ -34,6 +34,7 @@ jobs:
       - name: Build application
         run: npm run build
         env: 
+          NODE_ENV: production
           GH_TOKEN: ${{ secrets.GH_TOKEN }} 
 
       - name: Upload Artifact

@@ -6,7 +6,7 @@
   "main": "electron/main.js",
   "description": "Facebook automation bot",
   "homepage": "./",
-  "scripts": {
+    "scripts": {
     "dev": "concurrently \"npm:next:dev\" \"npm:electron:dev\"",
     "next:dev": "next dev",
     "electron:dev": "electron .",
