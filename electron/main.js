@@ -1,111 +1,89 @@
-// electron/main.js
+// electron-main.js
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
-const http = require('http');
+const waitOn = require('wait-on');
 
 let mainWindow;
-let nextServer;
-
-const isDev = process.env.NODE_ENV !== 'production';
-const port = 3000; // Port Next.js
+let nextProcess = null;
+const port = process.env.PORT || 3000;
+const serverUrl = `http://127.0.0.1:${port}`;
 
 function createWindow() {
+  console.log('[electron-main] Creating BrowserWindow...');
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: true,
-    },
+      contextIsolation: true
+    }
   });
 
-  mainWindow.loadURL(`http://localhost:${port}`);
-
-  if (isDev) {
-    mainWindow.webContents.openDevTools();
-  }
+  console.log(`[electron-main] Loading URL: ${serverUrl}`);
+  mainWindow.loadURL(serverUrl);
 
   mainWindow.on('closed', () => {
+    console.log('[electron-main] Main window closed');
     mainWindow = null;
   });
 }
-function getServerPath() {
-  if (app.isPackaged) {
-    // Path hasil build (AppImage / exe)
-    return path.join(process.resourcesPath, 'app.asar.unpacked', 'server.js');
-  } else {
-    // Path saat development
-    return path.join(__dirname, '../next-app/server.js');
-  }
-}
-// Fungsi polling untuk menunggu server siap
-function waitForServer(port, callback) {
-  const interval = setInterval(() => {
-    http.get(`http://localhost:${port}`, () => {
-      clearInterval(interval);
-      callback();
-    }).on('error', () => {
-       console.log('eror disini');
-    });
-  }, 300);
+
+function startNextDev() {
+  console.log('[electron-main] Spawning Next.js dev server...');
+  nextProcess = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['next', 'dev', '-p', String(port)], {
+    cwd: process.cwd(),
+    stdio: 'inherit',
+    env: Object.assign({}, process.env)
+  });
 }
 
-app.on('ready', () => {
-  if (!isDev) {
-    const userDataPath = app.getPath('userData');
-    const envOptions = {
-      ...process.env,
-      DATA_DIR: path.join(userDataPath, 'data'),
-      UPLOAD_DIR: path.join(userDataPath, 'uploads'),
-    };
+function startNextProd() {
+  console.log('[electron-main] Spawning Next.js production server...');
+  const serverPath = path.join(process.resourcesPath || process.cwd(), 'server.js');
+  console.log(`[electron-main] Server path: ${serverPath}`);
+  nextProcess = spawn(process.execPath, [serverPath], {
+    cwd: process.cwd(),
+    stdio: 'inherit',
+    env: Object.assign({}, process.env, { NODE_ENV: 'production' })
+  });
+}
 
-    const serverPath = getServerPath(); console.log('Starting server from:', serverPath);
+app.on('ready', async () => {
+  console.log('[electron-main] App ready, isPackaged=', app.isPackaged);
 
-    console.log(`Starting Next.js server: node ${serverPath}`);
-
-    nextServer = spawn('node', [serverPath], {
-      shell: process.platform === 'win32',
-      env: envOptions,
-    });
-
-    nextServer.stdout.on('data', (data) => {
-      console.log(`NEXT.JS LOG: ${data}`);
-    });
-
-    nextServer.stderr.on('data', (data) => {
-      console.error(`NEXT.JS ERROR: ${data}`);
-    });
-
-    nextServer.on('close', (code) => {
-      console.log(`Next.js server stopped with code ${code}`);
-    });
-
-    nextServer.on('error', (err) => {
-      console.error('Failed to start Next.js server', err);
-    });
-
-    // Tunggu server siap baru buka BrowserWindow
-    waitForServer(port, () => {
-      createWindow();
-    });
-
+  if (!app.isPackaged) {
+    startNextDev();
   } else {
-    // Dev mode
-    createWindow();
+    startNextProd();
   }
+
+  try {
+    console.log(`[electron-main] Waiting for ${serverUrl}...`);
+    await waitOn({ resources: [serverUrl], timeout: 30000 });
+    console.log('[electron-main] Next.js server is ready');
+  } catch (err) {
+    console.error('[electron-main] Timed out waiting for Next.js server:', err);
+  }
+
+  createWindow();
 });
 
 app.on('window-all-closed', () => {
+  console.log('[electron-main] All windows closed');
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
-app.on('quit', () => {
-  if (nextServer) nextServer.kill();
+app.on('before-quit', () => {
+  console.log('[electron-main] App quitting, killing Next.js process');
+  if (nextProcess) {
+    try { nextProcess.kill(); } catch (e) { console.error('[electron-main] Error killing process:', e); }
+  }
 });
 
 app.on('activate', () => {
+  console.log('[electron-main] App activated');
   if (mainWindow === null) createWindow();
 });
